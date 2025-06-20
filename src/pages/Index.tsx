@@ -201,6 +201,25 @@ const Index = () => {
                 </div>
               </div>
             </div>
+            <div className="mt-4">
+              <h3 className="font-semibold mb-2">3. Database Schema Setup</h3>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>After setting up Supabase, run the SQL schema:</p>
+                <ol className="list-decimal list-inside space-y-1 ml-4">
+                  <li>Go to your Supabase dashboard</li>
+                  <li>Navigate to "SQL Editor"</li>
+                  <li>Create a new query</li>
+                  <li>Copy and paste the contents of `supabase-schema.sql`</li>
+                  <li>Click "Run" to execute</li>
+                </ol>
+                {dbStatus && !dbStatus.tablesExist && (
+                  <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 rounded text-red-800 dark:text-red-200 text-xs">
+                    ⚠️ Database tables missing:{" "}
+                    {dbStatus.missingTables.join(", ")}
+                  </div>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
