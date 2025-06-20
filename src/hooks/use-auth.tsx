@@ -144,7 +144,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (profileError) {
-          console.error("Error creating profile:", profileError);
+          console.error("Error creating profile:", {
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint,
+            code: profileError.code,
+          });
+
+          // Return the profile creation error to the user
+          return {
+            data: null,
+            error: {
+              message: `Profile creation failed: ${profileError.message || "Unknown error"}. Please ensure the database is properly set up.`,
+            },
+          };
         }
       }
 
