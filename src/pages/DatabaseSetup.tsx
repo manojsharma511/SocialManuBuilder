@@ -89,6 +89,27 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE views ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist to avoid conflicts
+DROP POLICY IF EXISTS "Profiles are publicly readable" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Posts are publicly readable" ON posts;
+DROP POLICY IF EXISTS "Users can insert own posts" ON posts;
+DROP POLICY IF EXISTS "Users can update own posts" ON posts;
+DROP POLICY IF EXISTS "Users can delete own posts" ON posts;
+DROP POLICY IF EXISTS "Follows are publicly readable" ON follows;
+DROP POLICY IF EXISTS "Users can manage own follows" ON follows;
+DROP POLICY IF EXISTS "Likes are publicly readable" ON likes;
+DROP POLICY IF EXISTS "Users can manage own likes" ON likes;
+DROP POLICY IF EXISTS "Comments are publicly readable" ON comments;
+DROP POLICY IF EXISTS "Users can insert own comments" ON comments;
+DROP POLICY IF EXISTS "Users can update own comments" ON comments;
+DROP POLICY IF EXISTS "Users can delete own comments" ON comments;
+DROP POLICY IF EXISTS "Users can read own messages" ON messages;
+DROP POLICY IF EXISTS "Users can send messages" ON messages;
+DROP POLICY IF EXISTS "Users can manage own bookmarks" ON bookmarks;
+DROP POLICY IF EXISTS "Users can insert own views" ON views;
+
 -- Profiles policies
 CREATE POLICY "Profiles are publicly readable" ON profiles FOR SELECT USING (true);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
@@ -127,14 +148,19 @@ CREATE POLICY "Users can manage own bookmarks" ON bookmarks FOR ALL USING (auth.
 CREATE POLICY "Users can insert own views" ON views FOR INSERT WITH CHECK (auth.uid() = viewer_id);
 
 -- Create storage bucket for media uploads
-INSERT INTO storage.buckets (id, name, public) 
+INSERT INTO storage.buckets (id, name, public)
 VALUES ('posts', 'posts', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing storage policies if they exist
+DROP POLICY IF EXISTS "Anyone can view post images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload post images" ON storage.objects;
 
 -- Storage policies
 CREATE POLICY "Anyone can view post images" ON storage.objects FOR SELECT USING (bucket_id = 'posts');
 CREATE POLICY "Authenticated users can upload post images" ON storage.objects FOR INSERT WITH CHECK (
   bucket_id = 'posts' AND auth.role() = 'authenticated'
+);
 );`;
 
 export default function DatabaseSetup() {
