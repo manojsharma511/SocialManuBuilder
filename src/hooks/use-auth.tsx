@@ -166,7 +166,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const profileTest = await testProfileCreation(data.user.id, username);
 
         if (!profileTest.success) {
-          console.error("❌ Profile creation test failed:", profileTest.error);
+          console.error("❌ Profile creation test failed:");
+          console.error("Error message:", profileTest.error?.message);
+          console.error("Error code:", profileTest.error?.code);
+          console.error("Error details:", profileTest.error?.details);
+          console.error("Error hint:", profileTest.error?.hint);
+          console.error(
+            "Full error:",
+            JSON.stringify(profileTest.error, null, 2),
+          );
 
           // Try to provide helpful error message
           const errorMsg = profileTest.error?.message || "Unknown error";
