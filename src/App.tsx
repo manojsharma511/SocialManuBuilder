@@ -10,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 // Pages
 import Index from "./pages/Index";
 import DatabaseSetup from "./pages/DatabaseSetup";
+import DebugSQL from "./pages/DebugSQL";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -34,8 +35,9 @@ const App = () => (
               {/* Welcome page */}
               <Route path="/" element={<Index />} />
 
-              {/* Setup route */}
+              {/* Setup routes */}
               <Route path="/setup" element={<DatabaseSetup />} />
+              <Route path="/debug" element={<DebugSQL />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
