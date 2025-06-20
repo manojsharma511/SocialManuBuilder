@@ -1,10 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, Profile, isSupabaseConfigured } from "@/lib/supabase";
-import {
-  quickDatabaseTest,
-  testSpecificProfileInsert,
-} from "@/lib/simple-test";
 
 interface AuthContextType {
   user: User | null;
@@ -27,35 +23,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // If Supabase is not configured, set demo mode
     if (!isSupabaseConfigured) {
-      console.warn(
-        "Supabase not configured. Running in demo mode. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.",
-      );
+      console.warn("Supabase not configured. Running in demo mode.");
       setLoading(false);
       return;
     }
 
     // Get initial session
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id);
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Error getting session:", error);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+          }
         }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error getting session:", error);
-        setLoading(false);
-      });
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
         await fetchProfile(session.user.id);
       } else {
@@ -75,7 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If profile doesn't exist, that's okay - it might be a new user
+        if (error.code === "PGRST116") {
+          console.log("Profile not found, user might be new");
+          return;
+        }
+        throw error;
+      }
       setProfile(data);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -100,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       return { data, error };
     } catch (error) {
+      console.error("Sign in error:", error);
       return {
         data: null,
         error: {
@@ -124,10 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("🚀 Starting signup process...");
 
     try {
-      // First, run a quick database test
-      await quickDatabaseTest();
-
-      // Check if username is available
+      // First check if username is available
       console.log("👤 Checking username availability...");
       const { data: existingProfile, error: usernameError } = await supabase
         .from("profiles")
@@ -137,15 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (usernameError && usernameError.code !== "PGRST116") {
         // PGRST116 means "no rows found" which is what we want
-        console.error("❌ Username check error:");
-        console.error("Message:", usernameError.message);
-        console.error("Code:", usernameError.code);
-        console.error("Details:", usernameError.details);
-
+        console.error("❌ Username check error:", usernameError);
         return {
           data: null,
           error: {
-            message: `Database error (${usernameError.code}): ${usernameError.message}. The database might not be properly set up.`,
+            message: `Database error: ${usernameError.message}. Please check your database setup.`,
           },
         };
       }
@@ -155,52 +162,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log("✅ Username available, creating auth user...");
+
+      // Create the auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username: username,
+          },
+        },
       });
 
       if (error) {
-        console.error("❌ Auth signup error:");
-        console.error("Message:", error.message);
-        console.error("Full error:", JSON.stringify(error, null, 2));
+        console.error("❌ Auth signup error:", error);
         return { data, error };
       }
 
       if (data.user) {
-        console.log("✅ Auth user created, now creating profile...");
+        console.log("✅ Auth user created, creating profile...");
 
-        // Test profile creation with clearer error reporting
-        const profileTest = await testSpecificProfileInsert(
-          data.user.id,
-          username,
-        );
+        // Create profile immediately (don't wait for trigger)
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          username: username,
+          bio: "",
+          is_private: false,
+        });
 
-        if (!profileTest.success) {
-          const err = profileTest.error;
-          const errorMsg = err?.message || "Unknown error";
-          const errorCode = err?.code || "unknown";
-          const errorHint = err?.hint || "";
+        if (profileError) {
+          console.error("❌ Profile creation error:", profileError);
 
-          // Check for specific RLS policy error
-          if (
-            errorCode === "42501" &&
-            errorMsg.includes("row-level security policy")
-          ) {
+          // Provide specific error guidance
+          if (profileError.code === "42501") {
             return {
               data: null,
               error: {
-                message: `RLS Policy Error: Profile creation blocked. Go to /fix for one-line solution.`,
+                message:
+                  "Profile creation blocked by security policy. Database needs RLS policy fix.",
+              },
+            };
+          } else if (profileError.code === "23505") {
+            return {
+              data: null,
+              error: {
+                message: "Profile already exists for this user.",
+              },
+            };
+          } else {
+            return {
+              data: null,
+              error: {
+                message: `Profile creation failed: ${profileError.message}. Please check database setup.`,
               },
             };
           }
-
-          return {
-            data: null,
-            error: {
-              message: `Profile creation failed (${errorCode}): ${errorMsg}${errorHint ? ". Hint: " + errorHint : ""}. Go to /debug for help.`,
-            },
-          };
         }
 
         console.log("✅ Profile created successfully!");
@@ -212,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {
         data: null,
         error: {
-          message: `Registration error: ${error instanceof Error ? error.message : "Unknown error"}. Please check your Supabase configuration.`,
+          message: `Registration error: ${error instanceof Error ? error.message : "Unknown error"}`,
         },
       };
     }
@@ -222,7 +238,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured) {
       return;
     }
-    await supabase.auth.signOut();
+
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   const value = {
