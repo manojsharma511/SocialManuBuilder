@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import {
   Instagram,
   Database,
@@ -13,6 +15,8 @@ import {
   Camera,
   Users,
   Settings,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 
 const Index = () => {
@@ -41,6 +45,28 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="max-w-4xl mx-auto">
+        {/* Configuration Status */}
+        {!isSupabaseConfigured && (
+          <Alert className="mb-8 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              <strong>Setup Required:</strong> Supabase is not configured.
+              Please add your environment variables to enable full
+              functionality.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isSupabaseConfigured && (
+          <Alert className="mb-8 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              <strong>Ready to go!</strong> Supabase is configured and ready for
+              use.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Header */}
         <div className="text-center mb-12">
           <div className="mx-auto w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center mb-6">
@@ -63,16 +89,19 @@ const Index = () => {
             <Button
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => navigate("/login")}
+              onClick={() =>
+                navigate(isSupabaseConfigured ? "/login" : "#setup")
+              }
+              disabled={!isSupabaseConfigured}
             >
-              Get Started
+              {isSupabaseConfigured ? "Get Started" : "Setup Required"}
             </Button>
             <Button
               variant="outline"
               size="lg"
               onClick={() => navigate("/home")}
             >
-              View App
+              {isSupabaseConfigured ? "View App" : "Preview App"}
             </Button>
           </div>
         </div>
