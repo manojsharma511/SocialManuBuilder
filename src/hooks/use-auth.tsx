@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, Profile, isSupabaseConfigured } from "@/lib/supabase";
+import { testDatabaseConnection, testProfileCreation } from "@/lib/debug-db";
 
 interface AuthContextType {
   user: User | null;
@@ -117,57 +118,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
+    console.log("🚀 Starting signup process...");
+
     try {
+      // First, run database tests
+      const dbStatus = await testDatabaseConnection();
+      console.log("📊 Database status:", dbStatus);
+
       // Check if username is available
-      const { data: existingProfile } = await supabase
+      console.log("👤 Checking username availability...");
+      const { data: existingProfile, error: usernameError } = await supabase
         .from("profiles")
         .select("username")
         .eq("username", username)
         .single();
 
+      if (usernameError && usernameError.code !== "PGRST116") {
+        // PGRST116 means "no rows found" which is what we want
+        console.error("❌ Username check error:", usernameError);
+        return {
+          data: null,
+          error: {
+            message: `Database error: ${usernameError.message}. The database might not be properly set up.`,
+          },
+        };
+      }
+
       if (existingProfile) {
         return { data: null, error: { message: "Username already taken" } };
       }
 
+      console.log("✅ Username available, creating auth user...");
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (data.user && !error) {
-        // Create profile
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: data.user.id,
-          username,
-          bio: "",
-          is_private: false,
-        });
+      if (error) {
+        console.error("❌ Auth signup error:", error);
+        return { data, error };
+      }
 
-        if (profileError) {
-          console.error("Error creating profile:", {
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint,
-            code: profileError.code,
-          });
+      if (data.user) {
+        console.log("✅ Auth user created, now creating profile...");
 
-          // Return the profile creation error to the user
+        // Test profile creation first
+        const profileTest = await testProfileCreation(data.user.id, username);
+
+        if (!profileTest.success) {
+          console.error("❌ Profile creation test failed:", profileTest.error);
+
+          // Try to provide helpful error message
+          const errorMsg = profileTest.error?.message || "Unknown error";
+          const errorCode = profileTest.error?.code || "unknown";
+          const errorHint = profileTest.error?.hint || "";
+
           return {
             data: null,
             error: {
-              message: `Profile creation failed: ${profileError.message || "Unknown error"}. Please ensure the database is properly set up.`,
+              message: `Profile creation failed (${errorCode}): ${errorMsg}${errorHint ? ". Hint: " + errorHint : ""}. Please check your database setup.`,
             },
           };
         }
+
+        console.log("✅ Profile created successfully!");
       }
 
       return { data, error };
     } catch (error) {
+      console.error("💥 Signup process failed:", error);
       return {
         data: null,
         error: {
-          message:
-            "Registration error. Please check your Supabase configuration.",
+          message: `Registration error: ${error instanceof Error ? error.message : "Unknown error"}. Please check your Supabase configuration.`,
         },
       };
     }
