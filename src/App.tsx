@@ -11,6 +11,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import DatabaseSetup from "./pages/DatabaseSetup";
 import DebugSQL from "./pages/DebugSQL";
+import RLSFix from "./pages/RLSFix";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -38,6 +39,7 @@ const App = () => (
               {/* Setup routes */}
               <Route path="/setup" element={<DatabaseSetup />} />
               <Route path="/debug" element={<DebugSQL />} />
+              <Route path="/rls-fix" element={<RLSFix />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
