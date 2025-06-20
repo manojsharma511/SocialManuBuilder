@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, Profile, isSupabaseConfigured } from "@/lib/supabase";
-import { testDatabaseConnection, testProfileCreation } from "@/lib/debug-db";
+import {
+  quickDatabaseTest,
+  testSpecificProfileInsert,
+} from "@/lib/simple-test";
 
 interface AuthContextType {
   user: User | null;
@@ -121,9 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("🚀 Starting signup process...");
 
     try {
-      // First, run database tests
-      const dbStatus = await testDatabaseConnection();
-      console.log("📊 Database status:", dbStatus);
+      // First, run a quick database test
+      await quickDatabaseTest();
 
       // Check if username is available
       console.log("👤 Checking username availability...");
@@ -135,11 +137,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (usernameError && usernameError.code !== "PGRST116") {
         // PGRST116 means "no rows found" which is what we want
-        console.error("❌ Username check error:", usernameError);
+        console.error("❌ Username check error:");
+        console.error("Message:", usernameError.message);
+        console.error("Code:", usernameError.code);
+        console.error("Details:", usernameError.details);
+
         return {
           data: null,
           error: {
-            message: `Database error: ${usernameError.message}. The database might not be properly set up.`,
+            message: `Database error (${usernameError.code}): ${usernameError.message}. The database might not be properly set up.`,
           },
         };
       }
@@ -155,36 +161,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error("❌ Auth signup error:", error);
+        console.error("❌ Auth signup error:");
+        console.error("Message:", error.message);
+        console.error("Full error:", JSON.stringify(error, null, 2));
         return { data, error };
       }
 
       if (data.user) {
         console.log("✅ Auth user created, now creating profile...");
 
-        // Test profile creation first
-        const profileTest = await testProfileCreation(data.user.id, username);
+        // Test profile creation with clearer error reporting
+        const profileTest = await testSpecificProfileInsert(
+          data.user.id,
+          username,
+        );
 
         if (!profileTest.success) {
-          console.error("❌ Profile creation test failed:");
-          console.error("Error message:", profileTest.error?.message);
-          console.error("Error code:", profileTest.error?.code);
-          console.error("Error details:", profileTest.error?.details);
-          console.error("Error hint:", profileTest.error?.hint);
-          console.error(
-            "Full error:",
-            JSON.stringify(profileTest.error, null, 2),
-          );
-
-          // Try to provide helpful error message
-          const errorMsg = profileTest.error?.message || "Unknown error";
-          const errorCode = profileTest.error?.code || "unknown";
-          const errorHint = profileTest.error?.hint || "";
+          const err = profileTest.error;
+          const errorMsg = err?.message || "Unknown error";
+          const errorCode = err?.code || "unknown";
+          const errorHint = err?.hint || "";
 
           return {
             data: null,
             error: {
-              message: `Profile creation failed (${errorCode}): ${errorMsg}${errorHint ? ". Hint: " + errorHint : ""}. Please check your database setup.`,
+              message: `Profile creation failed (${errorCode}): ${errorMsg}${errorHint ? ". Hint: " + errorHint : ""}. Go to /debug for help.`,
             },
           };
         }
