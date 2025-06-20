@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import { Copy, Check, ExternalLink, MousePointer } from "lucide-react";
 
 const SQL_SCHEMA = `-- SocialManu Supabase Schema
@@ -166,6 +167,7 @@ CREATE POLICY "Authenticated users can upload post images" ON storage.objects FO
 export default function DatabaseSetup() {
   const [copied, setCopied] = useState(false);
   const sqlTextRef = useRef<HTMLPreElement>(null);
+  const { toast } = useToast();
 
   const copyToClipboard = () => {
     // Skip clipboard API entirely in this environment and use fallback
@@ -199,20 +201,30 @@ export default function DatabaseSetup() {
       if (successful) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        toast({
+          title: "Copied!",
+          description: "SQL schema copied to clipboard successfully.",
+        });
       } else {
         // If execCommand fails, automatically select the visible text
         selectAllText();
-        alert(
-          "Automatic copy failed. The SQL text has been selected for you. Please press Ctrl/Cmd+C to copy.",
-        );
+        toast({
+          title: "Copy Failed",
+          description:
+            "Text has been selected. Press Ctrl/Cmd+C to copy manually.",
+          variant: "destructive",
+        });
       }
     } catch (err) {
       console.error("Copy failed:", err);
       // Auto-select the text and show instructions
       selectAllText();
-      alert(
-        "Copy failed. The SQL text has been selected for you. Please press Ctrl/Cmd+C to copy.",
-      );
+      toast({
+        title: "Copy Failed",
+        description:
+          "Text has been selected. Press Ctrl/Cmd+C to copy manually.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -223,6 +235,10 @@ export default function DatabaseSetup() {
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(range);
+      toast({
+        title: "Text Selected",
+        description: "SQL schema selected. Press Ctrl/Cmd+C to copy.",
+      });
     }
   };
 
