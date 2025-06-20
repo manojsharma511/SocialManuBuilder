@@ -1,40 +1,130 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Instagram,
+  Database,
+  Shield,
+  MessageSquare,
+  Heart,
+  Search,
+  Camera,
+  Users,
+  Settings,
+} from "lucide-react";
+
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Auto redirect to home after 3 seconds
+    const timer = setTimeout(() => {
+      navigate("/home");
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
+  const features = [
+    { icon: Shield, title: "Supabase Auth", desc: "Secure authentication" },
+    { icon: Users, title: "Follow System", desc: "Connect with friends" },
+    { icon: Camera, title: "Media Posts", desc: "Share photos & videos" },
+    { icon: Heart, title: "Likes & Comments", desc: "Engage with content" },
+    { icon: MessageSquare, title: "Real-time Chat", desc: "Private messaging" },
+    { icon: Search, title: "Explore", desc: "Discover new content" },
+    { icon: Database, title: "Cloud Storage", desc: "Supabase backend" },
+    { icon: Settings, title: "Admin Panel", desc: "Management tools" },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="mx-auto w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center mb-6">
+            <span className="text-3xl font-bold text-white">SM</span>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            Welcome to SocialManu
+          </h1>
+          <p className="text-xl text-muted-foreground mb-6">
+            A modern Instagram-style social media platform
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <Badge variant="secondary">React 18</Badge>
+            <Badge variant="secondary">TypeScript</Badge>
+            <Badge variant="secondary">Supabase</Badge>
+            <Badge variant="secondary">Tailwind CSS</Badge>
+            <Badge variant="secondary">Vite</Badge>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              onClick={() => navigate("/login")}
+            >
+              Get Started
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate("/home")}
+            >
+              View App
+            </Button>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <Card key={title} className="text-center">
+              <CardContent className="pt-6">
+                <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground">{desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Setup Instructions */}
+        <Card className="mb-8">
+          <CardHeader>
+            <h2 className="text-2xl font-bold text-center">Quick Setup</h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-semibold mb-2">1. Supabase Setup</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Create a new Supabase project</li>
+                  <li>• Copy your project URL and anon key</li>
+                  <li>• Update .env file with your credentials</li>
+                  <li>• Run the SQL schema (see README)</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">2. Environment Variables</h3>
+                <div className="bg-muted p-3 rounded-lg text-sm font-mono">
+                  <div>VITE_SUPABASE_URL=your-url</div>
+                  <div>VITE_SUPABASE_ANON_KEY=your-key</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Auto Redirect Notice */}
+        <div className="text-center">
+          <p className="text-muted-foreground">
+            Redirecting to the app in a few seconds...
+          </p>
+        </div>
       </div>
     </div>
   );
