@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return {
               data: null,
               error: {
-                message: `RLS Policy Error: Profile creation blocked by security policy. Go to /rls-fix to fix this issue.`,
+                message: `RLS Policy Error: Profile creation blocked by security policy. Go to /quick-fix for immediate solution.`,
               },
             };
           }
