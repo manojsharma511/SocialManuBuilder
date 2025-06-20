@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Copy, Check, ExternalLink } from "lucide-react";
+import { Copy, Check, ExternalLink, MousePointer } from "lucide-react";
 
 const SQL_SCHEMA = `-- SocialManu Supabase Schema
 -- Run this SQL in your Supabase SQL Editor
@@ -165,6 +165,7 @@ CREATE POLICY "Authenticated users can upload post images" ON storage.objects FO
 
 export default function DatabaseSetup() {
   const [copied, setCopied] = useState(false);
+  const sqlTextRef = useRef<HTMLPreElement>(null);
 
   const copyToClipboard = async () => {
     try {
@@ -199,6 +200,16 @@ export default function DatabaseSetup() {
       console.error("Failed to copy:", err);
       // Show user-friendly message
       alert("Copy failed. Please manually select and copy the SQL text below.");
+    }
+  };
+
+  const selectAllText = () => {
+    if (sqlTextRef.current) {
+      const range = document.createRange();
+      range.selectNodeContents(sqlTextRef.current);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
     }
   };
 
@@ -250,7 +261,7 @@ export default function DatabaseSetup() {
                 <h3 className="font-semibold mb-2">
                   Step 3: Copy & Paste This SQL
                 </h3>
-                <div className="flex gap-2 mb-2">
+                <div className="flex gap-2 mb-2 flex-wrap">
                   <Button
                     onClick={copyToClipboard}
                     variant="outline"
@@ -259,12 +270,30 @@ export default function DatabaseSetup() {
                     {copied ? <Check size={16} /> : <Copy size={16} />}
                     {copied ? "Copied!" : "Copy SQL"}
                   </Button>
+                  <Button
+                    onClick={selectAllText}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <MousePointer size={16} />
+                    Select All
+                  </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mb-2">
+                  If copy doesn't work, use "Select All" then Ctrl/Cmd+C to copy
+                  manually.
+                </p>
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-lg p-4 text-green-400 font-mono text-sm max-h-96 overflow-y-auto">
-              <pre>{SQL_SCHEMA}</pre>
+            <div className="bg-gray-900 rounded-lg p-4 text-green-400 font-mono text-sm max-h-96 overflow-y-auto border">
+              <pre
+                ref={sqlTextRef}
+                className="whitespace-pre-wrap select-text cursor-text"
+                style={{ userSelect: "text" }}
+              >
+                {SQL_SCHEMA}
+              </pre>
             </div>
 
             <div className="mt-4">
