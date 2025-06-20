@@ -88,7 +88,13 @@ const Index = () => {
               <AlertTriangle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-800 dark:text-red-200">
                 <strong>Database Setup Required:</strong> {dbStatus.error}.
-                Please run the SQL schema in your Supabase dashboard.
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-red-600 underline ml-1"
+                  onClick={() => navigate("/setup")}
+                >
+                  Click here to set up your database →
+                </Button>
               </AlertDescription>
             </Alert>
           )}
@@ -128,16 +134,19 @@ const Index = () => {
             <Button
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() =>
-                navigate(
-                  isSupabaseConfigured && dbStatus?.tablesExist
-                    ? "/login"
-                    : "#setup",
-                )
-              }
-              disabled={
-                !isSupabaseConfigured || !dbStatus?.tablesExist || checking
-              }
+              onClick={() => {
+                if (isSupabaseConfigured && dbStatus?.tablesExist) {
+                  navigate("/login");
+                } else if (isSupabaseConfigured && !dbStatus?.tablesExist) {
+                  navigate("/setup");
+                } else {
+                  // Scroll to setup instructions
+                  const setupSection =
+                    document.getElementById("setup-instructions");
+                  setupSection?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              disabled={checking}
             >
               {checking ? (
                 <>
@@ -178,7 +187,7 @@ const Index = () => {
         </div>
 
         {/* Setup Instructions */}
-        <Card className="mb-8">
+        <Card className="mb-8" id="setup-instructions">
           <CardHeader>
             <h2 className="text-2xl font-bold text-center">Quick Setup</h2>
           </CardHeader>
