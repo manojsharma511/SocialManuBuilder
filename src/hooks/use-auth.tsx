@@ -182,6 +182,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const errorCode = err?.code || "unknown";
           const errorHint = err?.hint || "";
 
+          // Check for specific RLS policy error
+          if (
+            errorCode === "42501" &&
+            errorMsg.includes("row-level security policy")
+          ) {
+            return {
+              data: null,
+              error: {
+                message: `RLS Policy Error: Profile creation blocked by security policy. Go to /rls-fix to fix this issue.`,
+              },
+            };
+          }
+
           return {
             data: null,
             error: {
