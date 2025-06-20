@@ -5,10 +5,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { Copy, Check, ExternalLink, MousePointer, Bug } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { testDatabaseConnection } from "@/lib/debug-db";
-import { Copy, Check, ExternalLink, MousePointer, Bug } from "lucide-react";
 
 const DEBUG_SQL = `-- Debug and Fix SQL for SocialManu
 -- Run this if you're still getting profile creation errors
