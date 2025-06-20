@@ -66,19 +66,33 @@ export default function Register() {
               <Alert variant="destructive">
                 <AlertDescription>
                   {error}
-                  {error.includes("Profile creation failed") && (
+                  {error.includes("RLS Policy Error") && (
                     <div className="mt-2">
                       <Button
                         variant="outline"
                         size="sm"
                         className="gap-2"
-                        onClick={() => navigate("/debug")}
+                        onClick={() => navigate("/rls-fix")}
                       >
                         <Bug size={14} />
-                        Debug This Issue
+                        Fix RLS Policy
                       </Button>
                     </div>
                   )}
+                  {error.includes("Profile creation failed") &&
+                    !error.includes("RLS Policy Error") && (
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => navigate("/debug")}
+                        >
+                          <Bug size={14} />
+                          Debug This Issue
+                        </Button>
+                      </div>
+                    )}
                 </AlertDescription>
               </Alert>
             )}
