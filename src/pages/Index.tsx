@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { checkDatabaseSetup, DatabaseStatus } from "@/lib/database-check";
 import {
   Instagram,
   Database,
@@ -17,13 +18,25 @@ import {
   Settings,
   AlertTriangle,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    // Auto redirect to home after 3 seconds
+    // Check database setup if Supabase is configured
+    if (isSupabaseConfigured) {
+      setChecking(true);
+      checkDatabaseSetup().then((status) => {
+        setDbStatus(status);
+        setChecking(false);
+      });
+    }
+
+    // Auto redirect to home after 8 seconds
     const timer = setTimeout(() => {
       navigate("/home");
     }, 8000);
@@ -57,15 +70,41 @@ const Index = () => {
           </Alert>
         )}
 
-        {isSupabaseConfigured && (
-          <Alert className="mb-8 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
-              <strong>Ready to go!</strong> Supabase is configured and ready for
-              use.
+        {isSupabaseConfigured && checking && (
+          <Alert className="mb-8 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+            <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              <strong>Checking database setup...</strong> Verifying all tables
+              are created.
             </AlertDescription>
           </Alert>
         )}
+
+        {isSupabaseConfigured &&
+          !checking &&
+          dbStatus &&
+          !dbStatus.tablesExist && (
+            <Alert className="mb-8 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                <strong>Database Setup Required:</strong> {dbStatus.error}.
+                Please run the SQL schema in your Supabase dashboard.
+              </AlertDescription>
+            </Alert>
+          )}
+
+        {isSupabaseConfigured &&
+          !checking &&
+          dbStatus &&
+          dbStatus.tablesExist && (
+            <Alert className="mb-8 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                <strong>Ready to go!</strong> Supabase is configured and
+                database tables are set up correctly.
+              </AlertDescription>
+            </Alert>
+          )}
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -90,18 +129,35 @@ const Index = () => {
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               onClick={() =>
-                navigate(isSupabaseConfigured ? "/login" : "#setup")
+                navigate(
+                  isSupabaseConfigured && dbStatus?.tablesExist
+                    ? "/login"
+                    : "#setup",
+                )
               }
-              disabled={!isSupabaseConfigured}
+              disabled={
+                !isSupabaseConfigured || !dbStatus?.tablesExist || checking
+              }
             >
-              {isSupabaseConfigured ? "Get Started" : "Setup Required"}
+              {checking ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking...
+                </>
+              ) : isSupabaseConfigured && dbStatus?.tablesExist ? (
+                "Get Started"
+              ) : (
+                "Setup Required"
+              )}
             </Button>
             <Button
               variant="outline"
               size="lg"
               onClick={() => navigate("/home")}
             >
-              {isSupabaseConfigured ? "View App" : "Preview App"}
+              {isSupabaseConfigured && dbStatus?.tablesExist
+                ? "View App"
+                : "Preview App"}
             </Button>
           </div>
         </div>
