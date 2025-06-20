@@ -65,34 +65,67 @@ export default function Register() {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {error}
-                  {error.includes("RLS Policy Error") && (
-                    <div className="mt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => navigate("/fix")}
-                      >
-                        <Bug size={14} />
-                        One-Line Fix
-                      </Button>
-                    </div>
-                  )}
-                  {error.includes("Profile creation failed") &&
-                    !error.includes("RLS Policy Error") && (
-                      <div className="mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          onClick={() => navigate("/debug")}
-                        >
-                          <Bug size={14} />
-                          Debug This Issue
-                        </Button>
+                  <div className="space-y-2">
+                    <div>{error}</div>
+
+                    {error.includes("security policy") && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">
+                          🚨 Quick Fix Required:
+                        </div>
+                        <div className="text-xs bg-red-100 dark:bg-red-900 p-2 rounded border">
+                          1. Open Supabase SQL Editor
+                          <br />
+                          2. Run:{" "}
+                          <code className="bg-red-200 dark:bg-red-800 px-1 rounded">
+                            ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
+                          </code>
+                          <br />
+                          3. Try registering again
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() =>
+                              window.open(
+                                "https://moxigystzunlawdbnmcf.supabase.co",
+                                "_blank",
+                              )
+                            }
+                          >
+                            <Bug size={14} />
+                            Open Supabase
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => navigate("/fix")}
+                          >
+                            <Bug size={14} />
+                            View Fix Page
+                          </Button>
+                        </div>
                       </div>
                     )}
+
+                    {error.includes("Profile creation failed") &&
+                      !error.includes("security policy") && (
+                        <div className="mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => navigate("/debug")}
+                          >
+                            <Bug size={14} />
+                            Debug This Issue
+                          </Button>
+                        </div>
+                      )}
+                  </div>
                 </AlertDescription>
               </Alert>
             )}
