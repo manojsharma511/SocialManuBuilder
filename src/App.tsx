@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import DatabaseSetup from "./pages/DatabaseSetup";
 import DebugSQL from "./pages/DebugSQL";
 import RLSFix from "./pages/RLSFix";
+import QuickFix from "./pages/QuickFix";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/setup" element={<DatabaseSetup />} />
               <Route path="/debug" element={<DebugSQL />} />
               <Route path="/rls-fix" element={<RLSFix />} />
+              <Route path="/quick-fix" element={<QuickFix />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
