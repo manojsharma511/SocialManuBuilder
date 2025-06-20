@@ -9,6 +9,7 @@ import { ThemeProvider } from "next-themes";
 
 // Pages
 import Index from "./pages/Index";
+import DatabaseSetup from "./pages/DatabaseSetup";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -32,6 +33,9 @@ const App = () => (
             <Routes>
               {/* Welcome page */}
               <Route path="/" element={<Index />} />
+
+              {/* Setup route */}
+              <Route path="/setup" element={<DatabaseSetup />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
