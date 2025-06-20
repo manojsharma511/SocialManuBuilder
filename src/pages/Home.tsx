@@ -3,9 +3,10 @@ import { AppLayout } from "@/components/AppLayout";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/lib/supabase";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Database } from "lucide-react";
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,6 +15,12 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchPosts = async () => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     try {
       // Get posts from followed users and own posts
       const { data: followedUsers } = await supabase
@@ -116,13 +123,24 @@ export default function Home() {
   return (
     <AppLayout>
       <div className="max-w-md mx-auto">
+        {/* Configuration warning */}
+        {!isSupabaseConfigured && (
+          <Alert className="m-4 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+            <Database className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              <strong>Demo Mode:</strong> Supabase is not configured. Set up
+              your environment variables to enable full functionality.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Pull to refresh */}
         <div className="flex justify-center py-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleRefresh}
-            disabled={refreshing}
+            disabled={refreshing || !isSupabaseConfigured}
             className="gap-2"
           >
             <RefreshCw
