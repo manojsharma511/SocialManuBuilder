@@ -13,6 +13,7 @@ import DatabaseSetup from "./pages/DatabaseSetup";
 import DebugSQL from "./pages/DebugSQL";
 import RLSFix from "./pages/RLSFix";
 import QuickFix from "./pages/QuickFix";
+import OneLineFix from "./pages/OneLineFix";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/debug" element={<DebugSQL />} />
               <Route path="/rls-fix" element={<RLSFix />} />
               <Route path="/quick-fix" element={<QuickFix />} />
+              <Route path="/fix" element={<OneLineFix />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />

@@ -72,10 +72,10 @@ export default function Register() {
                         variant="outline"
                         size="sm"
                         className="gap-2"
-                        onClick={() => navigate("/quick-fix")}
+                        onClick={() => navigate("/fix")}
                       >
                         <Bug size={14} />
-                        Quick Fix
+                        One-Line Fix
                       </Button>
                     </div>
                   )}
