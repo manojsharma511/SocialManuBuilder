@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
-import { supabase, Profile } from "@/lib/supabase";
+import { supabase, Profile, isSupabaseConfigured } from "@/lib/supabase";
 
 interface AuthContextType {
   user: User | null;
@@ -21,15 +21,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
+    // If Supabase is not configured, set demo mode
+    if (!isSupabaseConfigured) {
+      console.warn(
+        "Supabase not configured. Running in demo mode. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.",
+      );
       setLoading(false);
-    });
+      return;
+    }
+
+    // Get initial session
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error getting session:", error);
+        setLoading(false);
+      });
 
     // Listen for auth changes
     const {
@@ -64,48 +79,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    if (!isSupabaseConfigured) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Supabase not configured. Please set up your environment variables.",
+        },
+      };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { data, error };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Authentication error. Please check your Supabase configuration.",
+        },
+      };
+    }
   };
 
   const signUp = async (email: string, password: string, username: string) => {
-    // Check if username is available
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("username", username)
-      .single();
-
-    if (existingProfile) {
-      return { data: null, error: { message: "Username already taken" } };
+    if (!isSupabaseConfigured) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Supabase not configured. Please set up your environment variables.",
+        },
+      };
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      // Check if username is available
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("username", username)
+        .single();
 
-    if (data.user && !error) {
-      // Create profile
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        username,
-        bio: "",
-        is_private: false,
+      if (existingProfile) {
+        return { data: null, error: { message: "Username already taken" } };
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
       });
 
-      if (profileError) {
-        console.error("Error creating profile:", profileError);
-      }
-    }
+      if (data.user && !error) {
+        // Create profile
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          username,
+          bio: "",
+          is_private: false,
+        });
 
-    return { data, error };
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+      }
+
+      return { data, error };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Registration error. Please check your Supabase configuration.",
+        },
+      };
+    }
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured) {
+      return;
+    }
     await supabase.auth.signOut();
   };
 
