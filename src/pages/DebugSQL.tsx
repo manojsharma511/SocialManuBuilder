@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { Copy, Check, ExternalLink, MousePointer, Bug } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import { testDatabaseConnection } from "@/lib/debug-db";
 import { Copy, Check, ExternalLink, MousePointer, Bug } from "lucide-react";
 
@@ -14,8 +20,8 @@ SELECT 'Checking profiles table...' as status;
 SELECT * FROM profiles LIMIT 1;
 
 -- Check if RLS is enabled
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
+SELECT schemaname, tablename, rowsecurity
+FROM pg_tables
 WHERE tablename = 'profiles';
 
 -- Check policies
@@ -38,7 +44,7 @@ BEGIN
     FALSE
   );
   RETURN NEW;
-EXCEPTION 
+EXCEPTION
   WHEN others THEN
     -- Log the error but don't fail the auth
     RAISE WARNING 'Failed to create profile for user %: %', NEW.id, SQLERRM;
@@ -54,9 +60,9 @@ CREATE TRIGGER on_auth_user_created
 
 -- 3. Fix RLS policies (sometimes the policies are too restrictive)
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
-CREATE POLICY "Users can insert own profile" ON profiles 
+CREATE POLICY "Users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (
-    auth.uid() = id OR 
+    auth.uid() = id OR
     -- Allow the trigger to create profiles
     current_setting('role') = 'service_role'
   );
