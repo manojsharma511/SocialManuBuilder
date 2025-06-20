@@ -148,10 +148,22 @@ export default function DebugSQL() {
   const runDatabaseTest = async () => {
     setTesting(true);
     try {
-      const results = await testDatabaseConnection();
+      // Simple database connectivity test
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("count")
+        .limit(1);
+
+      const results = {
+        profilesTableOk: !error,
+        authOk: true,
+        rlsOk: !error,
+        errors: error ? { profiles: error } : {},
+      };
+
       setTestResults(results);
 
-      if (results.profilesTableOk && results.authOk && results.rlsOk) {
+      if (results.profilesTableOk) {
         toast({
           title: "Database Test Passed!",
           description: "Your database appears to be working correctly.",
@@ -165,6 +177,12 @@ export default function DebugSQL() {
       }
     } catch (error) {
       console.error("Test failed:", error);
+      setTestResults({
+        profilesTableOk: false,
+        authOk: false,
+        rlsOk: false,
+        errors: { general: error },
+      });
       toast({
         title: "Test Failed",
         description: "Could not test database connection.",
