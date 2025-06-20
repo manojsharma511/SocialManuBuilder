@@ -1,5 +1,6 @@
 import { AppHeader } from "./AppHeader";
 import { MobileNav } from "./MobileNav";
+import { cn } from "@/lib/utils";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,8 +22,4 @@ export function AppLayout({
       {showNav && <MobileNav />}
     </div>
   );
-}
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
 }

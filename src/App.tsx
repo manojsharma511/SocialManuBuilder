@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "next-themes";
 
 // Pages
+import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -29,8 +30,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Redirect root to home */}
-              <Route path="/" element={<Navigate to="/home" replace />} />
+              {/* Welcome page */}
+              <Route path="/" element={<Index />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
