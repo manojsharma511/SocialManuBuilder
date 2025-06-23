@@ -14,6 +14,7 @@ import DebugSQL from "./pages/DebugSQL";
 import RLSFix from "./pages/RLSFix";
 import QuickFix from "./pages/QuickFix";
 import OneLineFix from "./pages/OneLineFix";
+import EmergencyRegister from "./pages/EmergencyRegister";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -48,6 +49,10 @@ const App = () => (
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route
+                path="/emergency-register"
+                element={<EmergencyRegister />}
+              />
 
               {/* Protected routes */}
               <Route
