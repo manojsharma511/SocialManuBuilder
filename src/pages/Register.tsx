@@ -68,7 +68,9 @@ export default function Register() {
                   <div className="space-y-2">
                     <div>{error}</div>
 
-                    {error.includes("security policy") && (
+                    {(error.includes("security policy") ||
+                      error.includes("Profile creation failed") ||
+                      error.includes("RLS Policy Error")) && (
                       <div className="space-y-2">
                         <div className="text-sm font-medium">
                           🚨 Quick Fix Required:
@@ -106,6 +108,14 @@ export default function Register() {
                           >
                             <Bug size={14} />
                             View Fix Page
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+                            onClick={() => navigate("/emergency-register")}
+                          >
+                            🚨 Emergency Register
                           </Button>
                         </div>
                       </div>

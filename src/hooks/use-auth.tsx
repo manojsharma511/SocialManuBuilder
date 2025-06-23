@@ -191,15 +191,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (profileError) {
-          console.error("❌ Profile creation error:", profileError);
+          console.error("❌ Profile creation error:");
+          console.error("Message:", profileError.message);
+          console.error("Code:", profileError.code);
+          console.error("Details:", profileError.details);
+          console.error("Full error:", JSON.stringify(profileError, null, 2));
 
           // Provide specific error guidance
           if (profileError.code === "42501") {
             return {
               data: null,
               error: {
-                message:
-                  "Profile creation blocked by security policy. Database needs RLS policy fix.",
+                message: `RLS Policy Error: ${profileError.message}. Go to /emergency-register to bypass this issue.`,
               },
             };
           } else if (profileError.code === "23505") {
@@ -213,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return {
               data: null,
               error: {
-                message: `Profile creation failed: ${profileError.message}. Please check database setup.`,
+                message: `Profile creation failed (${profileError.code}): ${profileError.message || "Unknown error"}. Use /emergency-register to bypass.`,
               },
             };
           }
