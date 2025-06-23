@@ -15,7 +15,7 @@ export function MobileNav() {
   const navItems = [
     { icon: Home, label: "Home", path: "/home" },
     { icon: Search, label: "Explore", path: "/explore" },
-    { icon: PlusSquare, label: "Create", path: "/create" },
+    { icon: PlusSquare, label: "Reels", path: "/reels" },
     { icon: Heart, label: "Activity", path: "/activity" },
     { icon: User, label: "Profile", path: "/profile" },
   ];

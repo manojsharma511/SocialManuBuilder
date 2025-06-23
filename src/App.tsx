@@ -17,12 +17,12 @@ import OneLineFix from "./pages/OneLineFix";
 import EmergencyRegister from "./pages/EmergencyRegister";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Home from "./pages/Home";
-import Explore from "./pages/Explore";
-import Create from "./pages/Create";
+import HomeInstagram from "./pages/HomeInstagram";
+import ExploreInstagram from "./pages/ExploreInstagram";
+import Reels from "./pages/Reels";
 import Activity from "./pages/Activity";
-import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
+import ProfileInstagram from "./pages/ProfileInstagram";
+import MessagesInstagram from "./pages/MessagesInstagram";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,7 +59,7 @@ const App = () => (
                 path="/home"
                 element={
                   <ProtectedRoute>
-                    <Home />
+                    <HomeInstagram />
                   </ProtectedRoute>
                 }
               />
@@ -67,7 +67,15 @@ const App = () => (
                 path="/explore"
                 element={
                   <ProtectedRoute>
-                    <Explore />
+                    <ExploreInstagram />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reels"
+                element={
+                  <ProtectedRoute>
+                    <Reels />
                   </ProtectedRoute>
                 }
               />
@@ -75,7 +83,7 @@ const App = () => (
                 path="/create"
                 element={
                   <ProtectedRoute>
-                    <Create />
+                    <Reels />
                   </ProtectedRoute>
                 }
               />
@@ -91,7 +99,7 @@ const App = () => (
                 path="/profile"
                 element={
                   <ProtectedRoute>
-                    <Profile />
+                    <ProfileInstagram />
                   </ProtectedRoute>
                 }
               />
@@ -99,7 +107,7 @@ const App = () => (
                 path="/messages"
                 element={
                   <ProtectedRoute>
-                    <Messages />
+                    <MessagesInstagram />
                   </ProtectedRoute>
                 }
               />
