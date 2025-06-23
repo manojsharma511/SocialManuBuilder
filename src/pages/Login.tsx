@@ -19,6 +19,15 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // TEMPORARY: Skip login process and go directly to home
+    console.log("🚀 Bypassing login - going directly to home");
+    navigate("/home");
+
+    return; // Skip the actual auth process
+
+    // Original login code (commented out for now)
+    /*
     setLoading(true);
     setError("");
 
@@ -31,6 +40,7 @@ export default function Login() {
     }
 
     setLoading(false);
+    */
   };
 
   return (

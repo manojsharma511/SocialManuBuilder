@@ -37,7 +37,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/* Welcome page */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/home" replace />} />
 
               {/* Setup routes */}
               <Route path="/setup" element={<DatabaseSetup />} />
