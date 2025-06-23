@@ -185,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Create profile immediately (don't wait for trigger)
         const { error: profileError } = await supabase.from("profiles").insert({
           id: data.user.id,
+          user_id: data.user.id, // Add user_id field that database expects
           username: username,
           bio: "",
           is_private: false,
