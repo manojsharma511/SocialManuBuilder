@@ -360,6 +360,71 @@ export const mockReels = Array.from({ length: 30 }, (_, index) => {
 export const mockFollowing = allUsers.slice(1, 31).map((user) => user.id);
 export const mockFollowers = allUsers.slice(5, 40).map((user) => user.id);
 
+// AI Bot user for enhanced messaging
+export const aiBotUser = {
+  id: "ai-bot",
+  username: "socialmania_ai",
+  name: "SocialManu AI",
+  avatar:
+    "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=150&h=150&fit=crop&crop=face&auto=format",
+  bio: "🤖 Your AI Social Media Assistant | 💡 Content Ideas | 📈 Growth Tips | 24/7 Available",
+  followers: 0,
+  following: 0,
+  posts: 0,
+  isVerified: true,
+  isPrivate: false,
+  isAI: true,
+};
+
+// Enhanced message structure for better chat functionality
+export interface EnhancedChatMessage {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: string;
+  type: "text" | "image" | "heart" | "typing";
+  isFromAI?: boolean;
+  reactions?: string[];
+  status?: "sent" | "delivered" | "read";
+}
+
+// Sample enhanced messages with reactions and status
+export const mockEnhancedMessages: EnhancedChatMessage[] = [
+  {
+    id: "msg1",
+    senderId: "1",
+    content: "Hey! How are you doing?",
+    timestamp: "2:30 PM",
+    type: "text",
+    status: "read",
+    reactions: ["👍", "❤️"],
+  },
+  {
+    id: "msg2",
+    senderId: "default-user",
+    content: "I'm good! Just working on some projects. What about you?",
+    timestamp: "2:32 PM",
+    type: "text",
+    status: "read",
+  },
+  {
+    id: "msg3",
+    senderId: "1",
+    content: "Same here! Just finished a new design 🎨",
+    timestamp: "2:35 PM",
+    type: "text",
+    status: "delivered",
+  },
+  {
+    id: "msg4",
+    senderId: "default-user",
+    content: "❤️",
+    timestamp: "2:36 PM",
+    type: "heart",
+    status: "sent",
+  },
+];
+
 export const mockComments = [
   {
     id: "comment1",
