@@ -12,22 +12,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // TEMPORARY: Skip authentication check
-    console.log(
-      "🚀 Bypassing authentication - allowing access to protected routes",
-    );
-    return;
+    const defaultUser = localStorage.getItem("defaultUser");
 
-    // Original auth check (commented out for now)
-    /*
-    if (!loading && !user) {
+    if (!loading && !user && !defaultUser) {
       navigate("/login", { replace: true });
     }
-    */
   }, [user, loading, navigate]);
 
-  // TEMPORARY: Skip loading check and allow immediate access
-  if (false && loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-black">
         {/* Header skeleton */}
@@ -71,15 +63,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // TEMPORARY: Always render children, skip user check
-  return <>{children}</>;
+  const defaultUser = localStorage.getItem("defaultUser");
 
-  // Original user check (commented out for now)
-  /*
-  if (!user) {
+  if (!user && !defaultUser) {
     return null;
   }
 
   return <>{children}</>;
-  */
 }

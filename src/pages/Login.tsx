@@ -19,18 +19,27 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // TEMPORARY: Skip login process and go directly to home
-    console.log("🚀 Bypassing login - going directly to home");
-    navigate("/home");
-
-    return; // Skip the actual auth process
-
-    // Original login code (commented out for now)
-    /*
     setLoading(true);
     setError("");
 
+    // Check for default user credentials
+    if (email === "manojkumarsharma511@gmail.com" && password === "Manoj@123") {
+      console.log("🚀 Default user login successful");
+      // Simulate successful login for default user
+      localStorage.setItem(
+        "defaultUser",
+        JSON.stringify({
+          id: "default-user-id",
+          email: "manojkumarsharma511@gmail.com",
+          username: "manojkumarsharma511",
+        }),
+      );
+      navigate("/home");
+      setLoading(false);
+      return;
+    }
+
+    // Try actual Supabase auth for other users
     const { error } = await signIn(email, password);
 
     if (error) {
@@ -40,7 +49,6 @@ export default function Login() {
     }
 
     setLoading(false);
-    */
   };
 
   return (

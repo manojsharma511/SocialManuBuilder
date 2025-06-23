@@ -7,7 +7,13 @@ import { Settings, Grid, User, LogOut } from "lucide-react";
 export default function Profile() {
   const { user, profile, signOut } = useAuth();
 
+  // Check for default user
+  const defaultUser = localStorage.getItem("defaultUser");
+  const defaultUserData = defaultUser ? JSON.parse(defaultUser) : null;
+
   const handleSignOut = async () => {
+    // Clear default user if exists
+    localStorage.removeItem("defaultUser");
     await signOut();
   };
 
@@ -21,13 +27,26 @@ export default function Profile() {
               <Avatar className="w-20 h-20">
                 <AvatarImage src={profile?.avatar_url} />
                 <AvatarFallback className="text-2xl">
-                  {profile?.username?.charAt(0).toUpperCase() || "U"}
+                  {(
+                    profile?.username ||
+                    defaultUserData?.username ||
+                    "manojkumarsharma511"
+                  )
+                    .charAt(0)
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-xl font-bold">@{profile?.username}</h2>
+                <h2 className="text-xl font-bold">
+                  @
+                  {profile?.username ||
+                    defaultUserData?.username ||
+                    "manojkumarsharma511"}
+                </h2>
                 <p className="text-muted-foreground">
-                  {profile?.bio || "No bio yet"}
+                  {profile?.bio ||
+                    defaultUserData?.bio ||
+                    "Default user - Welcome to SocialManu!"}
                 </p>
               </div>
             </div>
